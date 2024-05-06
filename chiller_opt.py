@@ -4,6 +4,7 @@ import torch.optim as optim
 from torch.distributions import Categorical, Normal
 import pandas as pd
 import numpy as np
+import os
 # Constants
 num_systems = 4
 num_continuous_controls = num_systems * 9 #冷机冷冻水出水温度，冷却水进水温度,冷塔频率1,2,3,4，冷却塔冷却水出水温度,冷却泵功率,冷冻泵功率
@@ -72,6 +73,17 @@ class PolicyNetwork(nn.Module):
 policy = PolicyNetwork(num_features, num_continuous_controls, num_discrete_controls)
 optimizer = optim.Adam(policy.parameters(), lr=learning_rate)
 
+# Function to load model and optimizer states
+def load_model_and_optimizer(model, optimizer, filename="model_checkpoint.pth"):
+    if os.path.exists(filename):
+        checkpoint = torch.load(filename)
+        model.load_state_dict(checkpoint['model_state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        print("Loaded checkpoint from:", filename)
+    else:
+        print("No checkpoint found at:", filename)
+
+load_model_and_optimizer(policy, optimizer, filename="model_checkpoint.pth")
 
 
 
