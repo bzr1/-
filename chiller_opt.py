@@ -83,7 +83,7 @@ def load_model_and_optimizer(model, optimizer, filename="model_checkpoint.pth"):
     else:
         print("No checkpoint found at:", filename)
 
-load_model_and_optimizer(policy, optimizer, filename="model_checkpoint.pth")
+load_model_and_optimizer(policy, optimizer, filename="/Users/zhiranbai/Documents/GitHub/Chiller-plate-optimizatoin/model_checkpoint.pth")
 
 
 
@@ -100,8 +100,8 @@ def normalize(data):
     Returns:
         list: The normalized list of features.
     """
-    feature_mins = [0, 10, 20, 5, 0, 10, 20, 5, 0, 10, 0, 50, 0, 20, 0, 20, 0, 10,10,10,10,10,10,10,10,10,10,10,10] * 4  # Repeat pattern for all systems
-    feature_maxs = [100, 50, 80, 60, 100, 50, 80, 60, 100, 50, 100, 300, 100, 100, 100, 100, 100, 50,30,30,30,30,30,30,30,30,30,30,30] * 4
+    feature_mins = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0,0,0,0,0,0,0,0,0,0,0] * 4  # Repeat pattern for all systems
+    feature_maxs = [22.5, 26.2, 28.8, 36.1, 35.4, 39.4, 27.5, 30, 35, 39, 72.8, 6327, 43.6, 563, 49.7, 136, 52, 52 ,52,52,81.3,81.3,81.3,81.3,1300,1300,56.4,99,55] * 4
     normalized_data = []
     for i, value in enumerate(data):
         value=float(value)
@@ -134,7 +134,7 @@ def get_system_data(df,system_id):
         columns=['冷机冷冻回水温度', '冷机冷冻出水温度',
             '板换冷冻回水温度', '板换冷冻出水温度', '冷机冷却回水温度', '冷机冷却出水温度', '板换冷却回水温度', '板换冷却出水温度',
             '冷塔出水温度', '冷塔回水温度', '冷机负载率', '冷机功率', '冷冻水泵频率', '冷冻水泵功率', '冷却水泵频率',
-            '冷却水泵功率', '冷塔频率', '冷塔功率', '冷冻水流量', '冷却水流量','室外干球', '室外湿度', '室外湿球']
+            '冷却水泵功率', '冷塔频率', '冷塔功率', '冷冻水流量', '冷却水流量','室外干球', '室外湿度', '室外湿球']    #29
 
         # Construct the system identifier string
         target_identifier = f"{system_id}#系统"
@@ -276,9 +276,9 @@ def get_real_system_state():
 
 def scale_continuous_actions(actions):
     
-    min_values=[1,2,3,4,5,6,7,8,9]*4  #找人
-    max_values=[11,12,13,14,15,16,17,18,19]*4 #找人
-    continuous_name=['系统1:冷机冷冻水出水温度','系统1:冷却水进水温度','系统1:冷塔频率1','系统1:冷塔频率2','系统1:冷塔频率3','系统1:冷塔频率4','系统1:冷却塔冷却水出水温度','系统1:冷却泵功率','系统1:冷冻泵功率','系统2:冷机冷冻水出水温度','系统2:冷却水进水温度','系统2:冷塔频率1','系统2:冷塔频率2','系统2:冷塔频率3','系统2:冷塔频率4','系统2:冷却塔冷却水出水温度','系统2:冷却泵功率','系统2:冷冻泵功率','系统3:冷机冷冻水出水温度','系统3:冷却水进水温度','系统3:冷塔频率1','系统3:冷塔频率2','系统3:冷塔频率3','系统3:冷塔频率4','系统3:冷却塔冷却水出水温度','系统3:冷却泵功率','系统3:冷冻泵功率','系统4:冷机冷冻水出水温度','系统4:冷却水进水温度','系统4:冷塔频率1','系统4:冷塔频率2','系统4:冷塔频率3','系统4:冷塔频率4','系统4:冷却塔冷却水出水温度','系统4:冷却泵功率','系统4:冷冻泵功率']
+    min_values=[0,0,0,0,0,0,0,0,0]*4  
+    max_values=[26.2,35.4,52,52,52,52,35,49.7,43.6]*4 
+    continuous_name=['系统1:冷机冷冻水出水温度','系统1:冷却水进水温度','系统1:冷塔频率1','系统1:冷塔频率2','系统1:冷塔频率3','系统1:冷塔频率4','系统1:冷却塔冷却水出水温度','系统1:冷却泵频率','系统1:冷冻泵频率','系统2:冷机冷冻水出水温度','系统2:冷却水进水温度','系统2:冷塔频率1','系统2:冷塔频率2','系统2:冷塔频率3','系统2:冷塔频率4','系统2:冷却塔冷却水出水温度','系统2:冷却泵频率','系统2:冷冻泵频率','系统3:冷机冷冻水出水温度','系统3:冷却水进水温度','系统3:冷塔频率1','系统3:冷塔频率2','系统3:冷塔频率3','系统3:冷塔频率4','系统3:冷却塔冷却水出水温度','系统3:冷却泵频率','系统3:冷冻泵频率','系统4:冷机冷冻水出水温度','系统4:冷却水进水温度','系统4:冷塔频率1','系统4:冷塔频率2','系统4:冷塔频率3','系统4:冷塔频率4','系统4:冷却塔冷却水出水温度','系统4:冷却泵频率','系统4:冷冻泵频率']
     scaled_actions = []
     if isinstance(actions, torch.Tensor):
         actions = actions.squeeze()
@@ -294,23 +294,7 @@ def apply_discrete_action(action):
     category_List = ['System 1 Chiller: OFF', 'System 1 Chiller: ON', 'System 1 Plate Exchanger: OFF', 'System 1 Plate Exchanger: ON', 'System 1 Cooling Tower 1: OFF', 'System 1 Cooling Tower 1: ON', 'System 1 Cooling Tower 2: OFF', 'System 1 Cooling Tower 2: ON', 'System 1 Cooling Tower 3: OFF', 'System 1 Cooling Tower 3: ON', 'System 1 Cooling Tower 4: OFF', 'System 1 Cooling Tower 4: ON', 'System 1 whole: OFF','System 1 whole: ON','System 2 Chiller: OFF', 'System 2 Chiller: ON', 'System 2 Plate Exchanger: OFF', 'System 2 Plate Exchanger: ON', 'System 2 Cooling Tower 1: OFF', 'System 2 Cooling Tower 1: ON', 'System 2 Cooling Tower 2: OFF', 'System 2 Cooling Tower 2: ON', 'System 2 Cooling Tower 3: OFF', 'System 2 Cooling Tower 3: ON', 'System 2 Cooling Tower 4: OFF', 'System 2 Cooling Tower 4: ON','System 2 whole: OFF','System 2 whole: ON','System 3 Chiller: OFF', 'System 3 Chiller: ON', 'System 3 Plate Exchanger: OFF', 'System 3 Plate Exchanger: ON', 'System 3 Cooling Tower 1: OFF', 'System 3 Cooling Tower 1: ON', 'System 3 Cooling Tower 2: OFF', 'System 3 Cooling Tower 2: ON', 'System 3 Cooling Tower 3: OFF', 'System 3 Cooling Tower 3: ON', 'System 3 Cooling Tower 4: OFF', 'System 3 Cooling Tower 4: ON','System 3 whole: OFF','System 3 whole: ON','System 4 Chiller: OFF', 'System 4 Chiller: ON', 'System 4 Plate Exchanger: OFF', 'System 4 Plate Exchanger: ON', 'System 4 Cooling Tower 1: OFF', 'System 4 Cooling Tower 1: ON', 'System 4 Cooling Tower 2: OFF', 'System 4 Cooling Tower 2: ON', 'System 4 Cooling Tower 3: OFF', 'System 4 Cooling Tower 3: ON', 'System 4 Cooling Tower 4: OFF', 'System 4 Cooling Tower 4: ON', 'System 4 whole: OFF','System 4 whole: ON'] 
     chosen_action= category_List[action]
     return chosen_action
-# def control_loop(policy_network, system_state):
-#     # Assume system_state is input to your network and it outputs action probabilities
-#     state_tensor = torch.from_numpy(system_state).float().unsqueeze(0)
-#     means, std_devs, discrete_logits = policy_network(state_tensor)
 
-#     # Apply continuous actions
-#     temp_control = scale_continuous_action(means[0].item(), 20, 35)
-#     send_command_to_system(temp_control, system_id=1, parameter="temperature")
-
-#     # Apply discrete actions
-#     chiller_state = apply_discrete_action(discrete_logits[0])
-#     send_command_to_system(chiller_state, system_id=1, parameter="chiller_state")
-
-
-    
-    
-# This control loop would be called periodically or in response to system state changes
 
 
 def save_model_and_optimizer(model, optimizer, filename="model_checkpoint.pth"):
@@ -391,7 +375,7 @@ def apply_actions_to_real_system(continuous_actions, discrete_actions):
         next_state = []
         for system_id in range(1, num_systems + 1):
             if is_system_running(next_latest_time_rows,system_id):
-                system_data = get_system_data(latest_time_rows,system_id)
+                system_data = get_system_data(next_latest_time_rows,system_id)
             else:
                 system_data = [0] * 23
                 next_state.extend(system_data)
@@ -573,7 +557,7 @@ def main_training_loop():
 
         # Update policy after each episode or after collecting enough data
         train_policy_gradient(policy, optimizer, states, actions, rewards)
-        save_model_and_optimizer(policy, optimizer, filename=f"model_checkpoint.pth")
+        save_model_and_optimizer(policy, optimizer, filename=f"/Users/zhiranbai/Documents/GitHub/Chiller-plate-optimizatoin/model_checkpoint.pth")
         rewards.append(reward)
         current_state = normalize(next_state)
         step+=1
