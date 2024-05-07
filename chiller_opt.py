@@ -372,18 +372,21 @@ def apply_actions_to_real_system(continuous_actions, discrete_actions):
 
         next_latest_time_rows = df[df['MM-DD hour'] == new_max_time]    
 
-        next_state = []
-        for system_id in range(1, num_systems + 1):
-            if is_system_running(next_latest_time_rows,system_id):
-                system_data = get_system_data(next_latest_time_rows,system_id)
-            else:
-                system_data = [0] * 23
-                next_state.extend(system_data)
+        # next_state = []
+        # for system_id in range(1, num_systems + 1):
+        #     if is_system_running(next_latest_time_rows,system_id):
+        #         system_data = get_system_data(next_latest_time_rows,system_id)
+        #         next_state.extend(system_data)
+        #     else:
+        #         system_data = [0] * 23
+        #         next_state.extend(system_data)
 
-        next_state = next_state  # Apply normalization or standardization
+
+    next_state,next_cooling_demand=get_real_system_state()
+        # Apply normalization or standardization
 
 
-        return next_state
+    return next_state,next_cooling_demand
     
 
     
@@ -424,10 +427,9 @@ def is_chiller_on(state, index):
     return state[index] > 0
 
 #计算 reward
-def calculate_reward_from_power_consumption(current_state,next_state):
+def calculate_reward_from_power_consumption(current_state,next_state,current_cooling_demand, next_cooling_demand):
     #R=w1×Consumption reduced+w2×Cooling Demand Met−w3×Deviation from Set Points−w4×Operational Extremes
 
-    # List of indices we want to sum up, including index 18 with the complex string
     power_indices = [11, 13, 15, 20,21,22,23,40,42,44,49,50,51,52,69,71,73,78,79,80,81,98,100,102,107,108,109,110] 
 
     # Calculate the sum of the values at the specified indices
@@ -447,14 +449,12 @@ def calculate_reward_from_power_consumption(current_state,next_state):
         
     # Indices corresponding to the outlet temperatures of different chillers/systems
     chiller_outlet_temp_indices = [1, 30, 59, 88]
-    chiller_inlet_temp_indices=[0,29,58,87]
-    chill_water_flow_indices=[24,53,82,111]
     chiller_power=[11,40,69,98]
 
     cool_efficiency_reward = 0
     COP_reward=0
     turn_off_reward=0
-    for outlet_idx, inlet_idx, flow_idx,chill_power_idx in zip(chiller_outlet_temp_indices, chiller_inlet_temp_indices, chill_water_flow_indices,chiller_power):
+    for outlet_idx,chill_power_idx in zip(chiller_outlet_temp_indices,chiller_power):
         current_on = is_chiller_on(current_state, outlet_idx)
         next_on = is_chiller_on(next_state, outlet_idx)
 
@@ -467,14 +467,11 @@ def calculate_reward_from_power_consumption(current_state,next_state):
         elif current_on and next_on:
             chiller_count_on_current +=1
             chiller_count_on_next += 1
-            flow_rate = float(current_state[flow_idx])  
-            T_in_current = float(current_state[inlet_idx])
-            T_in_next=float(next_state[inlet_idx])
+            
             T_out_current = float(current_state[outlet_idx])
             T_out_next = float(next_state[outlet_idx])
-            c_p=4.186*1000/3600
-            Q_actual_current = flow_rate * c_p * (T_in_current - T_out_current)
-            Q_actual_next = flow_rate * c_p * (T_in_next - T_out_next)
+            
+            
 
             #turn_off reward
             if chiller_count_on_current>chiller_count_on_next:
@@ -498,8 +495,8 @@ def calculate_reward_from_power_consumption(current_state,next_state):
                 Operational_Extremes=-(float(next_state[outlet_idx])-13.3)  # penalty for undercooling
             
         
-            COP_current= Q_actual_current / float(current_state[chill_power_idx])
-            COP_next=Q_actual_next/float(next_state[chill_power_idx]) 
+            COP_current= current_cooling_demand / float(current_state[chill_power_idx])
+            COP_next=next_cooling_demand/float(next_state[chill_power_idx]) 
 
             if COP_next > COP_current:
                 COP_reward +=COP_next-COP_current# temp_improvement_reward is a factor defined elsewhere
@@ -544,7 +541,7 @@ def main_training_loop():
 
         # Apply the actions to the real system and get the new state and reward
         # Ensure this is done in a safe manner with proper error checking
-        next_state= apply_actions_to_real_system(continuous_actions, discrete_action)
+        next_state,next_cooling_demand= apply_actions_to_real_system(continuous_actions, discrete_action)
         
         # ...
 
@@ -552,7 +549,7 @@ def main_training_loop():
         actions.append((continuous_actions, discrete_action))  # Store actions taken
 
 #         Calculate reward based on the power consumption difference
-        reward = calculate_reward_from_power_consumption(current_state,next_state)
+        reward = calculate_reward_from_power_consumption(current_state,next_state,current_cooling_demand,next_cooling_demand)
 #         ...
 
         # Update policy after each episode or after collecting enough data
