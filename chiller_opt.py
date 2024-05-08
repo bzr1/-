@@ -23,7 +23,7 @@ num_system_off_action = 2
 
 # For num_systems systems, the discrete action space is:
 num_discrete_controls_per_system = num_chiller_actions + num_plate_exchanger_actions + num_cooling_tower_combinations
-num_discrete_controls = ((num_discrete_controls_per_system+num_system_off_action) * num_systems) 
+num_discrete_controls = ((num_discrete_controls_per_system+num_system_off_action) * num_systems)+1
 
 print('num_continuous_controls: {} , num_discrete_controls: {}'.format(num_continuous_controls,num_discrete_controls))
 
@@ -291,7 +291,7 @@ def scale_continuous_actions(actions):
 
 def apply_discrete_action(action):
     """ Apply a discrete action based on the output probabilities. """
-    category_List = ['System 1 Chiller: OFF', 'System 1 Chiller: ON', 'System 1 Plate Exchanger: OFF', 'System 1 Plate Exchanger: ON', 'System 1 Cooling Tower 1: OFF', 'System 1 Cooling Tower 1: ON', 'System 1 Cooling Tower 2: OFF', 'System 1 Cooling Tower 2: ON', 'System 1 Cooling Tower 3: OFF', 'System 1 Cooling Tower 3: ON', 'System 1 Cooling Tower 4: OFF', 'System 1 Cooling Tower 4: ON', 'System 1 whole: OFF','System 1 whole: ON','System 2 Chiller: OFF', 'System 2 Chiller: ON', 'System 2 Plate Exchanger: OFF', 'System 2 Plate Exchanger: ON', 'System 2 Cooling Tower 1: OFF', 'System 2 Cooling Tower 1: ON', 'System 2 Cooling Tower 2: OFF', 'System 2 Cooling Tower 2: ON', 'System 2 Cooling Tower 3: OFF', 'System 2 Cooling Tower 3: ON', 'System 2 Cooling Tower 4: OFF', 'System 2 Cooling Tower 4: ON','System 2 whole: OFF','System 2 whole: ON','System 3 Chiller: OFF', 'System 3 Chiller: ON', 'System 3 Plate Exchanger: OFF', 'System 3 Plate Exchanger: ON', 'System 3 Cooling Tower 1: OFF', 'System 3 Cooling Tower 1: ON', 'System 3 Cooling Tower 2: OFF', 'System 3 Cooling Tower 2: ON', 'System 3 Cooling Tower 3: OFF', 'System 3 Cooling Tower 3: ON', 'System 3 Cooling Tower 4: OFF', 'System 3 Cooling Tower 4: ON','System 3 whole: OFF','System 3 whole: ON','System 4 Chiller: OFF', 'System 4 Chiller: ON', 'System 4 Plate Exchanger: OFF', 'System 4 Plate Exchanger: ON', 'System 4 Cooling Tower 1: OFF', 'System 4 Cooling Tower 1: ON', 'System 4 Cooling Tower 2: OFF', 'System 4 Cooling Tower 2: ON', 'System 4 Cooling Tower 3: OFF', 'System 4 Cooling Tower 3: ON', 'System 4 Cooling Tower 4: OFF', 'System 4 Cooling Tower 4: ON', 'System 4 whole: OFF','System 4 whole: ON'] 
+    category_List = ['System 1 Chiller: OFF', 'System 1 Chiller: ON', 'System 1 Plate Exchanger: OFF', 'System 1 Plate Exchanger: ON', 'System 1 Cooling Tower 1: OFF', 'System 1 Cooling Tower 1: ON', 'System 1 Cooling Tower 2: OFF', 'System 1 Cooling Tower 2: ON', 'System 1 Cooling Tower 3: OFF', 'System 1 Cooling Tower 3: ON', 'System 1 Cooling Tower 4: OFF', 'System 1 Cooling Tower 4: ON', 'System 1 whole: OFF','System 1 whole: ON','System 2 Chiller: OFF', 'System 2 Chiller: ON', 'System 2 Plate Exchanger: OFF', 'System 2 Plate Exchanger: ON', 'System 2 Cooling Tower 1: OFF', 'System 2 Cooling Tower 1: ON', 'System 2 Cooling Tower 2: OFF', 'System 2 Cooling Tower 2: ON', 'System 2 Cooling Tower 3: OFF', 'System 2 Cooling Tower 3: ON', 'System 2 Cooling Tower 4: OFF', 'System 2 Cooling Tower 4: ON','System 2 whole: OFF','System 2 whole: ON','System 3 Chiller: OFF', 'System 3 Chiller: ON', 'System 3 Plate Exchanger: OFF', 'System 3 Plate Exchanger: ON', 'System 3 Cooling Tower 1: OFF', 'System 3 Cooling Tower 1: ON', 'System 3 Cooling Tower 2: OFF', 'System 3 Cooling Tower 2: ON', 'System 3 Cooling Tower 3: OFF', 'System 3 Cooling Tower 3: ON', 'System 3 Cooling Tower 4: OFF', 'System 3 Cooling Tower 4: ON','System 3 whole: OFF','System 3 whole: ON','System 4 Chiller: OFF', 'System 4 Chiller: ON', 'System 4 Plate Exchanger: OFF', 'System 4 Plate Exchanger: ON', 'System 4 Cooling Tower 1: OFF', 'System 4 Cooling Tower 1: ON', 'System 4 Cooling Tower 2: OFF', 'System 4 Cooling Tower 2: ON', 'System 4 Cooling Tower 3: OFF', 'System 4 Cooling Tower 3: ON', 'System 4 Cooling Tower 4: OFF', 'System 4 Cooling Tower 4: ON', 'System 4 whole: OFF','System 4 whole: ON','不做开启关闭'] 
     chosen_action= category_List[action]
     return chosen_action
 
@@ -506,7 +506,7 @@ def calculate_reward_from_power_consumption(current_state,next_state,current_coo
     
     
     
-    reward=consumption_reduced+turn_off_reward+cool_efficiency_reward+ COP_reward - Operational_Extremes
+    reward=consumption_reduced+turn_off_reward+cool_efficiency_reward+ COP_reward + Operational_Extremes
     #还差设定值的偏移
     return reward
 
@@ -524,9 +524,12 @@ def main_training_loop():
         
         state_tensor = torch.from_numpy(normalize(current_state)).float().unsqueeze(0)
         means, std_devs, discrete_logits = policy(state_tensor)
-
+        print('xxx')
+        print(means,std_devs)
+        print('xxx')
         # Sample from the distributions for continuous actions
         continuous_distribution = Normal(means, std_devs)
+        print(continuous_distribution)
         continuous_actions = continuous_distribution.sample()
         continuous_actions=scale_continuous_actions(continuous_actions)
         # Apply constraints to continuous actions here if necessary
