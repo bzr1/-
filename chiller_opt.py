@@ -555,7 +555,7 @@ def main_training_loop():
         reward = calculate_reward_from_power_consumption(current_state,next_state,current_cooling_demand,next_cooling_demand)
 #         ...
 
-        # Update policy after each episode or after collecting enough data
+        # Update policy after each step
         train_policy_gradient(policy, optimizer, states, actions, rewards)
         save_model_and_optimizer(policy, optimizer, filename=f"/Users/zhiranbai/Documents/GitHub/Chiller-plate-optimizatoin/model_checkpoint.pth")
         rewards.append(reward)
